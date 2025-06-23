@@ -1,11 +1,12 @@
 import Groq from 'groq-sdk';
-import { Jaccard } from 'natural';
+import { TavilyClient } from 'tavily';
 
 // Define the structure for a response from an AI model
 interface ModelResponse {
   content: string;
   model: string;
   timestamp: Date;
+  sources?: any[]; // To hold Tavily search results
 }
 
 // Configuration for a specific language model
@@ -24,11 +25,15 @@ interface ConsensusAgentConfig {
 
 class ConsensusAgent {
   private groqClient: Groq;
+  private tavilyClient: TavilyClient;
   private config: ConsensusAgentConfig;
 
   constructor(config: ConsensusAgentConfig) {
     const groqApiKey = import.meta.env.VITE_GROQ_API_KEY || 'YOUR_GROQ_API_KEY';
+    const tavilyApiKey = import.meta.env.VITE_TAVILY_API_KEY || 'YOUR_TAVILY_API_KEY';
+    
     this.groqClient = new Groq({ apiKey: groqApiKey, dangerouslyAllowBrowser: true });
+    this.tavilyClient = new TavilyClient({ apiKey: tavilyApiKey });
     this.config = config;
   }
 
@@ -56,7 +61,11 @@ class ConsensusAgent {
   }
 
   private calculateSimilarity(textA: string, textB: string): number {
-    return Jaccard.compare(textA.toLowerCase().split(/\s+/), textB.toLowerCase().split(/\s+/));
+    const setA = new Set(textA.toLowerCase().split(/\s+/));
+    const setB = new Set(textB.toLowerCase().split(/\s+/));
+    const intersection = new Set([...setA].filter(x => setB.has(x)));
+    const union = new Set([...setA, ...setB]);
+    return union.size === 0 ? 1 : intersection.size / union.size;
   }
 
   private selectBestResponse(
@@ -81,14 +90,29 @@ class ConsensusAgent {
     };
   }
 
+  private createPromptWithContext(prompt: string, context: any[]): string {
+    const contextString = context.map((item, index) => `[${index + 1}] ${item.title}: ${item.snippet}`).join('\n');
+    return `Based on the following search results:\n\n${contextString}\n\nPlease provide a comprehensive answer to the user's question: "${prompt}"`;
+  }
+
   public async generateConsensusResponse(prompt: string): Promise<ModelResponse> {
     try {
+      // Step 1: Perform a web search for context
+      const searchContext = await this.tavilyClient.search({ query: prompt, max_results: 5 });
+
+      // Step 2: Create a new prompt that includes the search context
+      const contextualPrompt = this.createPromptWithContext(prompt, searchContext.results);
+
+      // Step 3: Query the models with the enhanced prompt
       const [primaryResponse, secondaryResponse] = await Promise.all([
-        this.queryLanguageModel(this.config.primaryModel, prompt),
-        this.queryLanguageModel(this.config.secondaryModel, prompt),
+        this.queryLanguageModel(this.config.primaryModel, contextualPrompt),
+        this.queryLanguageModel(this.config.secondaryModel, contextualPrompt),
       ]);
 
-      return this.selectBestResponse(primaryResponse, secondaryResponse);
+      const finalResponse = this.selectBestResponse(primaryResponse, secondaryResponse);
+      finalResponse.sources = searchContext.results; // Attach sources to the final response
+      return finalResponse;
+
     } catch (error) {
       console.error('Error generating consensus response:', error);
       // In a real app, you might want a fallback to a single model here.

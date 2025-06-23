@@ -1,4 +1,4 @@
-import { Paper, Title, Box, TextInput, Button, Group, Loader, Text } from '@mantine/core';
+import { Paper, Title, Box, TextInput, Button, Group, Loader, Text, Accordion } from '@mantine/core';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import type { Message } from '../App';
@@ -30,6 +30,20 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
               <ReactMarkdown>{msg.content}</ReactMarkdown>
             </Text>
             {msg.model && <Text size="xs" c="dimmed" ta="right">Model: {msg.model}</Text>}
+            {msg.sources && (
+              <Accordion mt="md">
+                <Accordion.Item value="sources">
+                  <Accordion.Control>View Sources</Accordion.Control>
+                  <Accordion.Panel>
+                    {msg.sources.map((source: any, i: number) => (
+                      <Text component="a" href={source.url} target="_blank" size="xs" key={i} display="block">
+                        {i + 1}. {source.title}
+                      </Text>
+                    ))}
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>
+            )}
           </Paper>
         ))}
         {isProcessing && <Loader />}

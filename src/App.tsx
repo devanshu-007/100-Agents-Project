@@ -11,6 +11,7 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   model?: string;
+  sources?: any[];
 }
 
 // Configuration for the Consensus Agent
