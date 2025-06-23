@@ -1,8 +1,13 @@
-import ResearchPage from './pages/ResearchPage';
+import { AppLayout } from './components/AppLayout';
+import { ConversationFlow } from './components/ConversationFlow';
+import { SafetyReport } from './components/SafetyReport';
 
 function App() {
   return (
-    <ResearchPage />
+    <AppLayout 
+      chatPanel={<ConversationFlow />}
+      reportPanel={<SafetyReport />}
+    />
   );
 }
 
