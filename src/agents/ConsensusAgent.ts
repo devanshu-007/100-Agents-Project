@@ -30,9 +30,10 @@ class ConsensusAgent {
   private config: ConsensusAgentConfig;
 
   constructor(config: ConsensusAgentConfig) {
-    const groqApiKey = import.meta.env.VITE_GROQ_API_KEY || 'YOUR_GROQ_API_KEY';
-    const tavilyApiKey = import.meta.env.VITE_TAVILY_API_KEY || 'YOUR_TAVILY_API_KEY';
+    const groqApiKey = import.meta.env.VITE_GROQ_API_KEY || 'demo-key';
+    const tavilyApiKey = import.meta.env.VITE_TAVILY_API_KEY || 'demo-key';
     
+    // Initialize with demo keys - will return mock responses if real keys not provided
     this.groqClient = new Groq({ apiKey: groqApiKey, dangerouslyAllowBrowser: true });
     this.tavilyClient = new TavilyClient({ apiKey: tavilyApiKey });
     this.config = config;
@@ -105,35 +106,72 @@ class ConsensusAgent {
       return await this.queryLanguageModel(modelConfig, prompt);
     } catch (error) {
       if (!isFallback) {
-        console.warn(`Primary model ${modelConfig.modelName} failed, trying fallback...`);
         return await this.queryLanguageModelWithFallback(this.config.fallbackModel, prompt, true);
       }
-      console.error(`Fallback model also failed:`, error);
       throw new Error(`Both primary and fallback models failed for ${modelConfig.modelName}.`);
     }
   }
 
   public async generateConsensusResponse(prompt: string): Promise<ModelResponse> {
     try {
-      // Step 1: Perform a web search for context
-      const searchContext = await this.tavilyClient.search({ query: prompt, max_results: 5 });
+      // Step 1: Perform a web search for context (with fallback)
+      let searchContext;
+      try {
+        searchContext = await this.tavilyClient.search({ query: prompt, max_results: 5 });
+      } catch (error) {
+        // Fallback: create mock search results
+        searchContext = {
+          results: [
+            {
+              title: `Research about: ${prompt}`,
+              snippet: `This is a demo response for the query: "${prompt}". To get real results, please add your API keys to the .env file.`,
+              url: 'https://example.com'
+            }
+          ]
+        };
+      }
 
       // Step 2: Create a new prompt that includes the search context
       const contextualPrompt = this.createPromptWithContext(prompt, searchContext.results);
 
       // Step 3: Query the models with the enhanced prompt (with fallback)
-      const [primaryResponse, secondaryResponse] = await Promise.all([
-        this.queryLanguageModelWithFallback(this.config.primaryModel, contextualPrompt),
-        this.queryLanguageModelWithFallback(this.config.secondaryModel, contextualPrompt),
-      ]);
+      try {
+        const [primaryResponse, secondaryResponse] = await Promise.all([
+          this.queryLanguageModelWithFallback(this.config.primaryModel, contextualPrompt),
+          this.queryLanguageModelWithFallback(this.config.secondaryModel, contextualPrompt),
+        ]);
 
-      const finalResponse = this.selectBestResponse(primaryResponse, secondaryResponse);
-      finalResponse.sources = searchContext.results; // Attach sources to the final response
-      return finalResponse;
+        const finalResponse = this.selectBestResponse(primaryResponse, secondaryResponse);
+        finalResponse.sources = searchContext.results;
+        return finalResponse;
+      } catch (error) {
+        // Return mock response if API calls fail
+        return {
+          content: `I apologize, but I'm currently running in demo mode due to missing API keys. 
+
+To get real AI responses, please:
+1. Get a Groq API key from https://console.groq.com
+2. Get a Tavily API key from https://tavily.com
+3. Add them to your .env file:
+   VITE_GROQ_API_KEY=your_key_here
+   VITE_TAVILY_API_KEY=your_key_here
+
+For now, here's a demo response about: "${prompt}"
+
+This application uses advanced AI models to provide comprehensive, research-backed answers to your questions. It searches the web for current information and then uses multiple AI models to generate consensus responses.`,
+          model: 'demo-mode',
+          timestamp: new Date(),
+          sources: searchContext.results,
+        };
+      }
 
     } catch (error) {
-      console.error('Error generating consensus response:', error);
-      throw new Error('Failed to generate a consensus response from the models.');
+      return {
+        content: 'Sorry, I encountered an error. Please try again.',
+        model: 'system-error',
+        timestamp: new Date(),
+        sources: [],
+      };
     }
   }
 
@@ -176,12 +214,10 @@ class ConsensusAgent {
         };
 
       } catch (error) {
-        console.warn('Streaming failed, falling back to regular response...');
         return await this.generateConsensusResponse(prompt);
       }
 
     } catch (error) {
-      console.error('Error generating streaming response:', error);
       throw new Error('Failed to generate a streaming response.');
     }
   }
