@@ -20,6 +20,7 @@ interface LanguageModelConfig {
 interface ConsensusAgentConfig {
   primaryModel: LanguageModelConfig;
   secondaryModel: LanguageModelConfig;
+  fallbackModel: LanguageModelConfig; // New fallback option
   similarityThreshold: number; // e.g., 0.5 for 50% similarity
 }
 
@@ -95,6 +96,23 @@ class ConsensusAgent {
     return `Based on the following search results:\n\n${contextString}\n\nPlease provide a comprehensive answer to the user's question: "${prompt}"`;
   }
 
+  private async queryLanguageModelWithFallback(
+    modelConfig: LanguageModelConfig,
+    prompt: string,
+    isFallback: boolean = false
+  ): Promise<ModelResponse> {
+    try {
+      return await this.queryLanguageModel(modelConfig, prompt);
+    } catch (error) {
+      if (!isFallback) {
+        console.warn(`Primary model ${modelConfig.modelName} failed, trying fallback...`);
+        return await this.queryLanguageModelWithFallback(this.config.fallbackModel, prompt, true);
+      }
+      console.error(`Fallback model also failed:`, error);
+      throw new Error(`Both primary and fallback models failed for ${modelConfig.modelName}.`);
+    }
+  }
+
   public async generateConsensusResponse(prompt: string): Promise<ModelResponse> {
     try {
       // Step 1: Perform a web search for context
@@ -103,10 +121,10 @@ class ConsensusAgent {
       // Step 2: Create a new prompt that includes the search context
       const contextualPrompt = this.createPromptWithContext(prompt, searchContext.results);
 
-      // Step 3: Query the models with the enhanced prompt
+      // Step 3: Query the models with the enhanced prompt (with fallback)
       const [primaryResponse, secondaryResponse] = await Promise.all([
-        this.queryLanguageModel(this.config.primaryModel, contextualPrompt),
-        this.queryLanguageModel(this.config.secondaryModel, contextualPrompt),
+        this.queryLanguageModelWithFallback(this.config.primaryModel, contextualPrompt),
+        this.queryLanguageModelWithFallback(this.config.secondaryModel, contextualPrompt),
       ]);
 
       const finalResponse = this.selectBestResponse(primaryResponse, secondaryResponse);
@@ -115,8 +133,56 @@ class ConsensusAgent {
 
     } catch (error) {
       console.error('Error generating consensus response:', error);
-      // In a real app, you might want a fallback to a single model here.
       throw new Error('Failed to generate a consensus response from the models.');
+    }
+  }
+
+  public async *generateConsensusResponseStream(
+    prompt: string,
+    onToken?: (token: string) => void
+  ): AsyncGenerator<string, ModelResponse> {
+    try {
+      // Step 1: Perform a web search for context
+      const searchContext = await this.tavilyClient.search({ query: prompt, max_results: 5 });
+
+      // Step 2: Create a new prompt that includes the search context
+      const contextualPrompt = this.createPromptWithContext(prompt, searchContext.results);
+
+      // Step 3: Use primary model for streaming (fallback to secondary if needed)
+      let fullContent = '';
+      try {
+        const chatCompletion = await this.groqClient.chat.completions.create({
+          messages: [{ role: 'user', content: contextualPrompt }],
+          model: this.config.primaryModel.modelName,
+          temperature: this.config.primaryModel.temperature,
+          max_tokens: this.config.primaryModel.maxTokens,
+          stream: true,
+        });
+
+        for await (const chunk of chatCompletion) {
+          const token = chunk.choices[0]?.delta?.content || '';
+          if (token) {
+            fullContent += token;
+            onToken?.(token);
+            yield token;
+          }
+        }
+
+        return {
+          content: fullContent,
+          model: this.config.primaryModel.modelName,
+          timestamp: new Date(),
+          sources: searchContext.results,
+        };
+
+      } catch (error) {
+        console.warn('Streaming failed, falling back to regular response...');
+        return await this.generateConsensusResponse(prompt);
+      }
+
+    } catch (error) {
+      console.error('Error generating streaming response:', error);
+      throw new Error('Failed to generate a streaming response.');
     }
   }
 }
