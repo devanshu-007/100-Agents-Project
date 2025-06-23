@@ -351,12 +351,13 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
         background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, rgba(79, 255, 176, 0.02) 100%)',
         borderTop: '1px solid rgba(0, 212, 255, 0.2)',
       }}>
-        <Stack direction="row" spacing={3} alignItems="end">
+        <Stack direction="row" spacing={3} alignItems="flex-start">
           <TextField
             placeholder="Ask me anything about AI, research, technology..."
             fullWidth
             multiline
             maxRows={4}
+            minRows={1}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             onKeyDown={(e) => {
@@ -367,19 +368,31 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
             }}
             disabled={isProcessing}
             variant="outlined"
-                          sx={{
-                '& .MuiOutlinedInput-root': {
-                  fontSize: '1.1rem',
-                  minHeight: '60px',
-                  '& fieldset': {
-                    borderColor: 'rgba(0, 212, 255, 0.4)',
-                  },
-                  '& input, & textarea': {
-                    fontSize: '1.1rem',
-                    padding: '18px 24px',
-                  },
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                fontSize: '1.1rem',
+                minHeight: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                '& fieldset': {
+                  borderColor: 'rgba(0, 212, 255, 0.4)',
                 },
-              }}
+                '& textarea': {
+                  fontSize: '1.1rem',
+                  padding: '18px 24px !important',
+                  minHeight: '24px !important',
+                  maxHeight: 'none',
+                  resize: 'none',
+                  lineHeight: '1.5',
+                  overflow: 'hidden',
+                },
+                '&.Mui-focused': {
+                  '& textarea': {
+                    overflow: 'auto',
+                  }
+                }
+              },
+            }}
           />
           <Button 
             onClick={handleSend} 
@@ -393,7 +406,7 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
               fontSize: '1.1rem',
               fontWeight: 700,
               textTransform: 'none',
-              alignSelf: 'flex-end',
+              alignSelf: 'flex-start',
               background: 'linear-gradient(135deg, #00d4ff 0%, #4fffb0 100%)',
               color: '#000000',
               border: '1px solid rgba(0, 212, 255, 0.3)',
@@ -424,4 +437,4 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
       </Box>
     </Paper>
   );
-} 
+}
