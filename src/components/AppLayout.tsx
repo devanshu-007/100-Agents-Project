@@ -93,25 +93,9 @@ export function AppLayout({ chatPanel, reportPanel }: AppLayoutProps) {
                   letterSpacing: '-0.01em',
                 }}
               >
-                AI Agent Console
+                Aegis Veritas
               </Typography>
             </Stack>
-
-            {/* Beta Badge like Unseal */}
-            <Chip
-              icon={<Verified sx={{ fontSize: 16 }} />}
-              label="Live Beta • Advanced AI Research"
-              size="small"
-              sx={{
-                background: 'linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(34, 197, 94, 0.1))',
-                color: '#4ade80',
-                border: '1px solid rgba(74, 222, 128, 0.3)',
-                fontWeight: 600,
-                '& .MuiChip-icon': {
-                  color: '#4ade80',
-                },
-              }}
-            />
           </Toolbar>
         </Container>
       </AppBar>
@@ -120,7 +104,7 @@ export function AppLayout({ chatPanel, reportPanel }: AppLayoutProps) {
       <Box
         sx={{
           textAlign: 'center',
-          py: { xs: 4, md: 6 },
+          py: { xs: 2, md: 3 },
           px: 2,
           position: 'relative',
           zIndex: 1,
@@ -227,30 +211,32 @@ export function AppLayout({ chatPanel, reportPanel }: AppLayoutProps) {
         </Container>
       </Box>
 
-      {/* Main Content - Cards Layout like Unseal */}
+      {/* Main Content - Cards Layout like Unseal - 90VH HEIGHT */}
       <Container 
         maxWidth="xl" 
         sx={{ 
-          flexGrow: 1, 
-          pb: 4,
+          pb: 2, // Reduced padding
           px: { xs: 2, sm: 3, md: 4 },
           position: 'relative',
           zIndex: 1,
+          height: '90vh', // Fixed 90vh height as requested
+          display: 'flex', // Ensure container is flex for proper height distribution
+          flexDirection: 'column',
         }}
       >
         <Box 
           sx={{ 
             display: 'flex', 
             gap: { xs: 3, md: 4 }, 
-            height: { xs: 'auto', md: '600px' },
+            height: '100%', // Full available height
             flexDirection: { xs: 'column', md: 'row' }
           }}
         >
-          {/* Chat Panel */}
+          {/* Chat Panel - FULL HEIGHT */}
           <Box 
             sx={{ 
               flex: { md: 2 }, 
-              height: { xs: '500px', md: '100%' },
+              height: { xs: '60vh', md: '100%' }, // Full height on desktop, 60vh on mobile
               '& > *': {
                 background: 'rgba(26, 29, 33, 0.9)',
                 backdropFilter: 'blur(20px)',
@@ -259,6 +245,7 @@ export function AppLayout({ chatPanel, reportPanel }: AppLayoutProps) {
                 boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.05)',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 overflow: 'hidden',
+                height: '100%', // Ensure child takes full height
                 '&:hover': {
                   border: '1px solid rgba(74, 222, 128, 0.2)',
                   boxShadow: '0 8px 40px rgba(74, 222, 128, 0.1), 0 0 20px rgba(74, 222, 128, 0.05)',
@@ -269,11 +256,11 @@ export function AppLayout({ chatPanel, reportPanel }: AppLayoutProps) {
             {chatPanel}
           </Box>
           
-          {/* Risk Report Panel */}
+          {/* Risk Report Panel - FULL HEIGHT */}
           <Box 
             sx={{ 
               flex: { md: 1 }, 
-              height: { xs: '400px', md: '100%' },
+              height: { xs: '40vh', md: '100%' }, // Full height on desktop, 40vh on mobile
               '& > *': {
                 background: 'rgba(26, 29, 33, 0.9)',
                 backdropFilter: 'blur(20px)',
@@ -282,6 +269,7 @@ export function AppLayout({ chatPanel, reportPanel }: AppLayoutProps) {
                 boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.05)',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 overflow: 'hidden',
+                height: '100%', // Ensure child takes full height
                 '&:hover': {
                   border: '1px solid rgba(74, 222, 128, 0.2)',
                   boxShadow: '0 8px 40px rgba(74, 222, 128, 0.1), 0 0 20px rgba(74, 222, 128, 0.05)',

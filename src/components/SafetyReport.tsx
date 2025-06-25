@@ -61,88 +61,103 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
     icon: React.ReactNode, 
     isIntentAlignment = false,
     delay = 0
-  ) => (
-    <Grow in timeout={800} style={{ transitionDelay: `${delay}ms` }}>
-      <Card 
-        sx={{ 
-          background: 'rgba(26, 29, 33, 0.8)',
-          backdropFilter: 'blur(20px)',
-          border: `1px solid ${getScoreColor(value, isIntentAlignment)}40`,
-          borderRadius: 4,
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            border: `1px solid ${getScoreColor(value, isIntentAlignment)}60`,
-            boxShadow: `0 8px 32px ${getScoreColor(value, isIntentAlignment)}20`,
-          },
-        }}
-      >
-        <CardContent sx={{ textAlign: 'center', p: 3 }}>
-          <Box sx={{ 
-            mb: 2, 
-            p: 2,
-            borderRadius: 3,
-            background: `${getScoreColor(value, isIntentAlignment)}15`,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Box sx={{ color: getScoreColor(value, isIntentAlignment) }}>
-              {icon}
+  ) => {
+    // Debug: Log the actual value being passed
+    console.log(`${label} metric value:`, value);
+    
+    return (
+      <Grow in timeout={800} style={{ transitionDelay: `${delay}ms` }}>
+        <Card 
+          sx={{ 
+            background: 'rgba(26, 29, 33, 0.8)',
+            backdropFilter: 'blur(20px)',
+            border: `1px solid ${getScoreColor(value, isIntentAlignment)}40`,
+            borderRadius: 4,
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            '&:hover': {
+              transform: 'translateY(-4px)',
+              border: `1px solid ${getScoreColor(value, isIntentAlignment)}60`,
+              boxShadow: `0 8px 32px ${getScoreColor(value, isIntentAlignment)}20`,
+            },
+          }}
+        >
+          <CardContent sx={{ textAlign: 'center', p: 3 }}>
+            <Box sx={{ 
+              mb: 2, 
+              p: 2,
+              borderRadius: 3,
+              background: `${getScoreColor(value, isIntentAlignment)}15`,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Box sx={{ color: getScoreColor(value, isIntentAlignment) }}>
+                {icon}
+              </Box>
             </Box>
-          </Box>
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              textTransform: 'uppercase', 
-              fontWeight: 700,
-              fontSize: '0.75rem',
-              letterSpacing: '0.5px',
-              color: '#9ca3af',
-            }}
-          >
-            {label}
-          </Typography>
-          <Typography 
-            variant="h3" 
-            sx={{ 
-              fontWeight: 700, 
-              mt: 1,
-              mb: 1,
-              color: getScoreColor(value, isIntentAlignment),
-              fontSize: '2rem',
-            }}
-          >
-            {(value * 100).toFixed(0)}%
-          </Typography>
-          <Chip
-            size="small"
-            label={getScoreLabel(value, isIntentAlignment)}
-            sx={{
-              background: `${getScoreColor(value, isIntentAlignment)}20`,
-              color: getScoreColor(value, isIntentAlignment),
-              border: `1px solid ${getScoreColor(value, isIntentAlignment)}40`,
-              fontWeight: 600,
-              fontSize: '0.75rem',
-            }}
-          />
-        </CardContent>
-      </Card>
-    </Grow>
-  );
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                textTransform: 'uppercase', 
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                letterSpacing: '0.5px',
+                color: '#9ca3af',
+              }}
+            >
+              {label}
+            </Typography>
+            <Typography 
+              variant="h3" 
+              sx={{ 
+                fontWeight: 700, 
+                mt: 1,
+                mb: 1,
+                color: getScoreColor(value, isIntentAlignment),
+                fontSize: '2rem',
+              }}
+            >
+              {isNaN(value) ? '0' : (value * 100).toFixed(0)}%
+            </Typography>
+            <Chip
+              size="small"
+              label={getScoreLabel(value, isIntentAlignment)}
+              sx={{
+                background: `${getScoreColor(value, isIntentAlignment)}20`,
+                color: getScoreColor(value, isIntentAlignment),
+                border: `1px solid ${getScoreColor(value, isIntentAlignment)}40`,
+                fontWeight: 600,
+                fontSize: '0.75rem',
+              }}
+            />
+          </CardContent>
+        </Card>
+      </Grow>
+    );
+  };
 
   const getScoreColor = (score: number, isIntentAlignment = false) => {
-    if (isIntentAlignment) {
-      if (score > 0.7) return '#4ade80';
-      if (score > 0.3) return '#fbbf24';
-      return '#ef4444';
+    // Handle invalid scores
+    if (isNaN(score) || score === undefined || score === null) {
+      return '#6b7280'; // Gray for unknown/invalid scores
     }
-    if (score < 0.3) return '#4ade80';
-    if (score < 0.7) return '#fbbf24';
-    return '#ef4444';
+    
+    if (isIntentAlignment) {
+      if (score > 0.7) return '#8b5cf6'; // Purple for good intent alignment
+      if (score > 0.3) return '#f59e0b'; // Orange for moderate
+      return '#ef4444'; // Red for poor
+    }
+    // For risk metrics (lower is better)
+    if (score < 0.3) return '#8b5cf6'; // Purple for low risk
+    if (score < 0.7) return '#f59e0b'; // Orange for moderate risk
+    return '#ef4444'; // Red for high risk
   };
 
   const getScoreLabel = (score: number, isIntentAlignment = false) => {
+    if (isNaN(score) || score === undefined || score === null) {
+      return 'Unknown';
+    }
+    
     if (isIntentAlignment) {
       if (score > 0.7) return 'Excellent';
       if (score > 0.3) return 'Moderate';
@@ -175,19 +190,19 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
           sx={{
             fontWeight: 500,
             background: status === 'complete' 
-              ? 'rgba(74, 222, 128, 0.15)'
+              ? 'rgba(139, 92, 246, 0.15)' // Purple theme
               : status === 'analyzing'
-              ? 'rgba(74, 222, 128, 0.1)'
+              ? 'rgba(139, 92, 246, 0.1)'
               : 'rgba(75, 85, 99, 0.1)',
             color: status === 'complete' 
-              ? '#4ade80'
+              ? '#8b5cf6'
               : status === 'analyzing'
-              ? '#4ade80'
+              ? '#8b5cf6'
               : '#9ca3af',
             border: `1px solid ${status === 'complete' 
-              ? 'rgba(74, 222, 128, 0.3)'
+              ? 'rgba(139, 92, 246, 0.3)'
               : status === 'analyzing'
-              ? 'rgba(74, 222, 128, 0.2)'
+              ? 'rgba(139, 92, 246, 0.2)'
               : 'rgba(75, 85, 99, 0.3)'}`,
             '& .rotating': {
               animation: 'spin 1s linear infinite',
@@ -259,10 +274,10 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
         overflow: 'hidden'
       }}
     >
-      {/* Header - Unseal Style */}
+      {/* Header - Purple Theme */}
       <Box sx={{ 
         p: 4, 
-        background: 'linear-gradient(135deg, rgba(74, 222, 128, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%)',
+        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(124, 58, 237, 0.02) 100%)',
         borderBottom: '1px solid rgba(75, 85, 99, 0.2)',
       }}>
         <Stack direction="row" alignItems="center" spacing={3}>
@@ -270,11 +285,11 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
             sx={{
               p: 2,
               borderRadius: 3,
-              background: 'linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(34, 197, 94, 0.1))',
-              border: '1px solid rgba(74, 222, 128, 0.3)',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.1))',
+              border: '1px solid rgba(139, 92, 246, 0.3)',
             }}
           >
-            <Shield sx={{ fontSize: 32, color: '#4ade80' }} />
+            <Shield sx={{ fontSize: 32, color: '#8b5cf6' }} />
           </Box>
           <Box>
             <Typography variant="h5" sx={{ 
@@ -310,10 +325,10 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
             background: 'transparent',
           },
           '&::-webkit-scrollbar-thumb': {
-            background: 'linear-gradient(135deg, #4ade80, #22c55e)',
+            background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
             borderRadius: '6px',
             '&:hover': {
-              background: 'linear-gradient(135deg, #22c55e, #4ade80)',
+              background: 'linear-gradient(135deg, #7c3aed, #8b5cf6)',
             }
           },
         }}
@@ -344,8 +359,8 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
                   severity={report.isCompliant ? 'success' : 'warning'}
                   sx={{ 
                     borderRadius: 3,
-                    border: `1px solid ${report.isCompliant ? '#4ade80' : '#fbbf24'}40`,
-                    background: `${report.isCompliant ? '#4ade80' : '#fbbf24'}10`,
+                    border: `1px solid ${report.isCompliant ? '#8b5cf6' : '#fbbf24'}40`,
+                    background: `${report.isCompliant ? '#8b5cf6' : '#fbbf24'}10`,
                   }}
                 >
                   <Typography variant="body1" fontWeight={600}>
@@ -367,11 +382,11 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
                   gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
                   gap: 2,
                 }}>
-                  {renderMetricCard('Clarity', report.metrics.clarity, <Visibility />, false, 0)}
-                  {renderMetricCard('Bias', report.metrics.bias, <BalanceOutlined />, false, 100)}
-                  {renderMetricCard('Toxicity', report.metrics.toxicity, <HealthAndSafety />, false, 200)}
-                  {renderMetricCard('Hallucination', report.metrics.hallucination, <Psychology />, false, 300)}
-                  {renderMetricCard('Intent', report.metrics.intent_alignment, <TrackChanges />, true, 400)}
+                  {renderMetricCard('Clarity', report.metrics?.clarity || 0, <Visibility />, false, 0)}
+                  {renderMetricCard('Bias', report.metrics?.bias || 0, <BalanceOutlined />, false, 100)}
+                  {renderMetricCard('Toxicity', report.metrics?.toxicity || 0, <HealthAndSafety />, false, 200)}
+                  {renderMetricCard('Hallucination', report.metrics?.hallucination || 0, <Psychology />, false, 300)}
+                  {renderMetricCard('Intent', report.metrics?.intent_alignment || 0, <TrackChanges />, true, 400)}
                 </Box>
               </Box>
 
@@ -384,16 +399,16 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
                   <Accordion
                     sx={{
                       background: 'rgba(26, 29, 33, 0.8)',
-                      border: '1px solid rgba(75, 85, 99, 0.3)',
+                      border: '1px solid rgba(139, 92, 246, 0.3)',
                       borderRadius: '12px !important',
                       '&:before': { display: 'none' },
                     }}
                   >
                     <AccordionSummary 
-                      expandIcon={<ExpandMore sx={{ color: '#4ade80' }} />}
+                      expandIcon={<ExpandMore sx={{ color: '#8b5cf6' }} />}
                     >
                       <Stack direction="row" alignItems="center" spacing={2}>
-                        <Info sx={{ color: '#4ade80' }} />
+                        <Info sx={{ color: '#8b5cf6' }} />
                         <Typography variant="body1" fontWeight={600} sx={{ color: 'white' }}>
                           {report.items.length} Issue{report.items.length !== 1 ? 's' : ''} Found
                         </Typography>
@@ -442,13 +457,13 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
                 sx={{
                   p: 4,
                   borderRadius: 4,
-                  background: 'linear-gradient(135deg, rgba(74, 222, 128, 0.08), rgba(34, 197, 94, 0.04))',
-                  border: '1px solid rgba(74, 222, 128, 0.2)',
+                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(124, 58, 237, 0.04))',
+                  border: '1px solid rgba(139, 92, 246, 0.2)',
                   maxWidth: '300px',
                   mx: 'auto',
                 }}
               >
-                <Security sx={{ fontSize: 48, color: '#4ade80', mb: 2 }} />
+                <Security sx={{ fontSize: 48, color: '#8b5cf6', mb: 2 }} />
                 <Typography variant="h6" color="white" gutterBottom sx={{ fontWeight: 600 }}>
                   Ready for Analysis
                 </Typography>
@@ -467,7 +482,7 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
     switch (type) {
       case 'error': return <Error sx={{ color: '#ef4444' }} />;
       case 'warning': return <Warning sx={{ color: '#fbbf24' }} />;
-      case 'info': return <Info sx={{ color: '#4ade80' }} />;
+      case 'info': return <Info sx={{ color: '#8b5cf6' }} />;
     }
   }
 
@@ -475,7 +490,7 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
     switch (type) {
       case 'error': return '#ef4444';
       case 'warning': return '#fbbf24';
-      case 'info': return '#4ade80';
+      case 'info': return '#8b5cf6';
     }
   }
 } 

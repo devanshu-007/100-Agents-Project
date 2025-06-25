@@ -13,7 +13,9 @@ import {
   Divider,
   Chip,
   Fade,
-  Slide
+  Slide,
+  Skeleton,
+  LinearProgress
 } from '@mui/material';
 import { 
   ExpandMore, 
@@ -22,7 +24,9 @@ import {
   Person,
   Source,
   AutoAwesome,
-  Bolt
+  Bolt,
+  Search,
+  Analytics
 } from '@mui/icons-material';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -207,16 +211,16 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
                   alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
                   background: msg.role === 'user' 
                     ? 'linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(34, 197, 94, 0.1))'
-                    : 'rgba(26, 29, 33, 0.9)',
+                    : 'rgba(15, 17, 20, 0.95)',
                   color: msg.role === 'user' ? '#ffffff' : '#ffffff',
                   borderRadius: msg.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
                   border: msg.role === 'user' 
                     ? '1px solid rgba(74, 222, 128, 0.3)'
-                    : '1px solid rgba(75, 85, 99, 0.3)',
+                    : '1px solid rgba(74, 222, 128, 0.4)',
                   backdropFilter: 'blur(20px)',
                   boxShadow: msg.role === 'user' 
                     ? '0 4px 20px rgba(74, 222, 128, 0.2)'
-                    : '0 4px 20px rgba(0, 0, 0, 0.1)',
+                    : '0 6px 30px rgba(74, 222, 128, 0.25), 0 0 15px rgba(74, 222, 128, 0.1)',
                 }}
               >
                 {/* Message Header */}
@@ -227,7 +231,7 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
                       borderRadius: 2,
                       background: msg.role === 'user' 
                         ? 'rgba(255, 255, 255, 0.2)' 
-                        : 'rgba(74, 222, 128, 0.15)',
+                        : 'rgba(74, 222, 128, 0.2)',
                     }}
                   >
                     {msg.role === 'user' ? (
@@ -253,7 +257,7 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
                     '& p': { margin: 0, fontSize: '1rem' },
                     lineHeight: 1.6,
                     fontSize: '1rem',
-                    color: '#e5e7eb',
+                    color: '#ffffff',
                   }}
                 >
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -347,28 +351,101 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
           ))}
           
           {isProcessing && (
-            <Fade in>
+            <Fade in timeout={300}>
               <Paper 
                 elevation={0}
                 sx={{ 
-                  p: 3, 
-                  background: 'rgba(26, 29, 33, 0.9)',
-                  border: '1px solid rgba(74, 222, 128, 0.3)',
+                  p: 4, 
+                  background: 'rgba(15, 17, 20, 0.95)',
+                  border: '2px solid rgba(74, 222, 128, 0.4)',
                   borderRadius: '20px 20px 20px 4px',
                   maxWidth: '85%',
                   backdropFilter: 'blur(20px)',
-                  boxShadow: '0 4px 20px rgba(74, 222, 128, 0.15)',
+                  boxShadow: '0 8px 40px rgba(74, 222, 128, 0.2), 0 0 20px rgba(74, 222, 128, 0.1)',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <CircularProgress size={20} sx={{ color: '#4ade80' }} />
-                  <Typography variant="body2" sx={{ color: '#e5e7eb', fontWeight: 500 }}>
-                    🔍 Searching web & analyzing responses...
+                {/* Animated Border */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '3px',
+                    background: 'linear-gradient(90deg, transparent, #4ade80, transparent)',
+                    animation: 'shimmer 2s infinite',
+                    '@keyframes shimmer': {
+                      '0%': { transform: 'translateX(-100%)' },
+                      '100%': { transform: 'translateX(100%)' },
+                    },
+                  }}
+                />
+                
+                {/* Header */}
+                <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+                  <Box
+                    sx={{
+                      p: 1,
+                      borderRadius: 2,
+                      background: 'rgba(74, 222, 128, 0.2)',
+                    }}
+                  >
+                    <SmartToy sx={{ fontSize: 20, color: '#4ade80' }} />
+                  </Box>
+                  <Typography variant="subtitle2" sx={{ 
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                    color: '#4ade80'
+                  }}>
+                    AI Research Assistant
                   </Typography>
+                </Stack>
+
+                {/* Processing Steps */}
+                <Stack spacing={3}>
+                  <Box>
+                    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+                      <CircularProgress size={16} sx={{ color: '#4ade80' }} />
+                      <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 500 }}>
+                        🔍 Searching latest research...
+                      </Typography>
+                    </Stack>
+                    <LinearProgress 
+                      sx={{ 
+                        borderRadius: 2,
+                        height: 6,
+                        backgroundColor: 'rgba(75, 85, 99, 0.3)',
+                        '& .MuiLinearProgress-bar': {
+                          background: 'linear-gradient(90deg, #4ade80, #22c55e)',
+                          borderRadius: 2,
+                        },
+                      }} 
+                    />
+                  </Box>
+                  
+                  <Box>
+                    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                      <Analytics sx={{ fontSize: 16, color: '#4ade80' }} />
+                      <Typography variant="body2" sx={{ color: '#e5e7eb', fontWeight: 500 }}>
+                        🤖 Analyzing with 3 AI models...
+                      </Typography>
+                    </Stack>
+                  </Box>
+                  
+                  <Box>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Search sx={{ fontSize: 16, color: '#6b7280' }} />
+                      <Typography variant="body2" sx={{ color: '#9ca3af', fontWeight: 500 }}>
+                        🛡️ Running safety checks...
+                      </Typography>
+                    </Stack>
+                  </Box>
                 </Stack>
               </Paper>
             </Fade>
-          )}
+        )}
         </Stack>
       </Box>
 
@@ -408,8 +485,8 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
                   resize: 'none',
                 },
               },
-            }}
-          />
+          }}
+        />
           <Button 
             onClick={handleSend} 
             disabled={isProcessing || !userInput.trim()}
