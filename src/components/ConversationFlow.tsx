@@ -21,7 +21,8 @@ import {
   SmartToy, 
   Person,
   Source,
-  AutoAwesome
+  AutoAwesome,
+  Bolt
 } from '@mui/icons-material';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -44,16 +45,15 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
 
   const suggestionQueries = [
     "What are the latest AI safety developments?",
-    "Explain quantum computing in simple terms",
+    "Explain quantum computing breakthroughs in 2024",
     "What are the risks of AGI development?",
-    "How does machine learning bias occur?"
+    "How can businesses prepare for AI transformation?"
   ];
 
   return (
     <Paper 
       elevation={0}
       sx={{ 
-        p: 0,
         display: 'flex', 
         flexDirection: 'column', 
         height: '100%',
@@ -61,20 +61,38 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
         overflow: 'hidden'
       }}
     >
-      {/* Header with gradient */}
+      {/* Header - Unseal Style */}
       <Box sx={{ 
         p: 4, 
-        background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, rgba(79, 255, 176, 0.04) 100%)',
-        borderBottom: '1px solid rgba(0, 212, 255, 0.2)',
+        background: 'linear-gradient(135deg, rgba(74, 222, 128, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%)',
+        borderBottom: '1px solid rgba(75, 85, 99, 0.2)',
       }}>
         <Stack direction="row" alignItems="center" spacing={3}>
-          <AutoAwesome sx={{ fontSize: 40, color: 'primary.main' }} />
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(34, 197, 94, 0.1))',
+              border: '1px solid rgba(74, 222, 128, 0.3)',
+            }}
+          >
+            <AutoAwesome sx={{ fontSize: 32, color: '#4ade80' }} />
+          </Box>
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.5 }}>
-              AI Research Assistant
+            <Typography variant="h4" sx={{ 
+              fontWeight: 700, 
+              color: 'white', 
+              mb: 0.5,
+              fontSize: { xs: '1.75rem', md: '2rem' }
+            }}>
+              AI Research Console
             </Typography>
-            <Typography variant="subtitle1" color="text.secondary" sx={{ fontSize: '1.125rem' }}>
-              Powered by multi-model consensus & real-time web search
+            <Typography variant="body1" sx={{ 
+              color: '#9ca3af', 
+              fontSize: '1rem',
+              fontWeight: 500,
+            }}>
+              Multi-model consensus • Real-time verification • Risk analysis
             </Typography>
           </Box>
         </Stack>
@@ -84,23 +102,20 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
       <Box 
         sx={{ 
           flex: 1,
-          minHeight: 0, // This prevents the initial scrollbar
+          minHeight: 0,
           overflowY: 'auto', 
-          p: 2,
+          p: 3,
           '&::-webkit-scrollbar': {
-            width: '8px',
+            width: '6px',
           },
           '&::-webkit-scrollbar-track': {
             background: 'transparent',
-            borderRadius: '10px',
           },
           '&::-webkit-scrollbar-thumb': {
-            background: 'linear-gradient(135deg, #00d4ff, #4fffb0)',
-            borderRadius: '10px',
-            boxShadow: '0 0 10px rgba(0, 212, 255, 0.3)',
+            background: 'linear-gradient(135deg, #4ade80, #22c55e)',
+            borderRadius: '6px',
             '&:hover': {
-              background: 'linear-gradient(135deg, #4fffb0, #00d4ff)',
-              boxShadow: '0 0 15px rgba(0, 212, 255, 0.5)',
+              background: 'linear-gradient(135deg, #22c55e, #4ade80)',
             }
           },
         }}
@@ -108,15 +123,35 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
         {history.length === 0 && (
           <Fade in timeout={800}>
             <Box sx={{ textAlign: 'center', py: 6 }}>
-              <Typography 
-                variant="h5" 
-                color="text.primary" 
-                gutterBottom
-                sx={{ mb: 4, fontWeight: 600 }}
+              <Box
+                sx={{
+                  mb: 4,
+                  p: 3,
+                  borderRadius: 4,
+                  background: 'linear-gradient(135deg, rgba(74, 222, 128, 0.08), rgba(34, 197, 94, 0.04))',
+                  border: '1px solid rgba(74, 222, 128, 0.2)',
+                  maxWidth: '500px',
+                  mx: 'auto',
+                }}
               >
-                🚀 Ready to explore? Try asking:
-              </Typography>
-              <Stack spacing={3} alignItems="center">
+                <Bolt sx={{ fontSize: 48, color: '#4ade80', mb: 2 }} />
+                <Typography 
+                  variant="h5" 
+                  color="white" 
+                  gutterBottom
+                  sx={{ mb: 2, fontWeight: 600 }}
+                >
+                  Ready to explore verified AI insights?
+                </Typography>
+                <Typography 
+                  variant="body1" 
+                  sx={{ color: '#9ca3af', fontSize: '1rem' }}
+                >
+                  Try asking about technology, research, or any topic you need expert analysis on.
+                </Typography>
+              </Box>
+              
+              <Stack spacing={2} alignItems="center">
                 {suggestionQueries.map((query, index) => (
                   <Chip
                     key={index}
@@ -124,26 +159,28 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
                     onClick={() => setUserInput(query)}
                     size="medium"
                     sx={{
-                      maxWidth: '500px',
+                      maxWidth: '450px',
                       height: 'auto',
-                      py: 2,
-                      px: 3,
-                      fontSize: '1rem',
+                      py: 1.5,
+                      px: 2,
+                      fontSize: '0.95rem',
                       fontWeight: 500,
+                      cursor: 'pointer',
                       '& .MuiChip-label': {
                         whiteSpace: 'normal',
                         textAlign: 'center',
                         padding: '8px 16px',
                       },
-                      background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(79, 255, 176, 0.05))',
-                      border: '1px solid rgba(0, 212, 255, 0.3)',
-                      cursor: 'pointer',
+                      background: 'rgba(26, 29, 33, 0.8)',
+                      color: '#e5e7eb',
+                      border: '1px solid rgba(75, 85, 99, 0.3)',
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&:hover': {
-                        background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(79, 255, 176, 0.1))',
-                        transform: 'translateY(-3px)',
-                        boxShadow: '0 8px 24px rgba(0, 212, 255, 0.4), 0 0 20px rgba(79, 255, 176, 0.2)',
-                        border: '1px solid rgba(0, 212, 255, 0.5)',
+                        background: 'rgba(74, 222, 128, 0.1)',
+                        color: '#4ade80',
+                        border: '1px solid rgba(74, 222, 128, 0.4)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 20px rgba(74, 222, 128, 0.2)',
                       },
                     }}
                   />
@@ -153,7 +190,7 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
           </Fade>
         )}
         
-        <Stack spacing={2}>
+        <Stack spacing={3}>
           {history.map((msg, index) => (
             <Slide 
               key={index} 
@@ -163,50 +200,48 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
               style={{ transitionDelay: `${index * 100}ms` }}
             >
               <Paper 
-                variant="outlined"
+                elevation={0}
                 sx={{ 
-                  p: 4,
+                  p: 3,
                   maxWidth: '85%',
                   alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
                   background: msg.role === 'user' 
-                    ? 'linear-gradient(135deg, #00d4ff 0%, #4fffb0 100%)'
-                    : 'rgba(26, 26, 26, 0.9)',
-                  color: msg.role === 'user' ? '#000000' : '#ffffff',
-                  borderRadius: msg.role === 'user' ? '24px 24px 8px 24px' : '24px 24px 24px 8px',
+                    ? 'linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(34, 197, 94, 0.1))'
+                    : 'rgba(26, 29, 33, 0.9)',
+                  color: msg.role === 'user' ? '#ffffff' : '#ffffff',
+                  borderRadius: msg.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
                   border: msg.role === 'user' 
-                    ? '1px solid rgba(0, 212, 255, 0.3)'
-                    : '1px solid rgba(0, 212, 255, 0.2)',
-                  position: 'relative',
+                    ? '1px solid rgba(74, 222, 128, 0.3)'
+                    : '1px solid rgba(75, 85, 99, 0.3)',
+                  backdropFilter: 'blur(20px)',
                   boxShadow: msg.role === 'user' 
-                    ? '0 8px 32px rgba(0, 212, 255, 0.4), 0 0 20px rgba(79, 255, 176, 0.2)'
-                    : '0 4px 20px rgba(0, 212, 255, 0.1), 0 0 10px rgba(0, 212, 255, 0.05)',
-                  '&::before': msg.role === 'assistant' ? {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.03) 0%, rgba(79, 255, 176, 0.02) 100%)',
-                    borderRadius: 'inherit',
-                    pointerEvents: 'none',
-                  } : {},
+                    ? '0 4px 20px rgba(74, 222, 128, 0.2)'
+                    : '0 4px 20px rgba(0, 0, 0, 0.1)',
                 }}
               >
                 {/* Message Header */}
                 <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-                  {msg.role === 'user' ? (
-                    <Person sx={{ fontSize: 24, opacity: 0.9 }} />
-                  ) : (
-                    <SmartToy sx={{ fontSize: 24, color: 'primary.main' }} />
-                  )}
+                  <Box
+                    sx={{
+                      p: 1,
+                      borderRadius: 2,
+                      background: msg.role === 'user' 
+                        ? 'rgba(255, 255, 255, 0.2)' 
+                        : 'rgba(74, 222, 128, 0.15)',
+                    }}
+                  >
+                    {msg.role === 'user' ? (
+                      <Person sx={{ fontSize: 20, color: '#ffffff' }} />
+                    ) : (
+                      <SmartToy sx={{ fontSize: 20, color: '#4ade80' }} />
+                    )}
+                  </Box>
                   <Typography variant="subtitle2" sx={{ 
                     fontWeight: 600,
-                    fontSize: '1rem',
-                    opacity: msg.role === 'user' ? 0.95 : 1,
-                    color: msg.role === 'user' ? 'inherit' : 'primary.main'
+                    fontSize: '0.95rem',
+                    color: msg.role === 'user' ? '#ffffff' : '#4ade80'
                   }}>
-                    {msg.role === 'user' ? 'You' : 'AI Assistant'}
+                    {msg.role === 'user' ? 'You' : 'AI Research Assistant'}
                   </Typography>
                 </Stack>
 
@@ -215,9 +250,10 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
                   variant="body1" 
                   component="div"
                   sx={{ 
-                    '& p': { margin: 0, fontSize: '1.1rem' },
-                    lineHeight: 1.7,
-                    fontSize: '1.1rem',
+                    '& p': { margin: 0, fontSize: '1rem' },
+                    lineHeight: 1.6,
+                    fontSize: '1rem',
+                    color: '#e5e7eb',
                   }}
                 >
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -225,7 +261,7 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
                 
                 {/* Model Info */}
                 {msg.model && msg.role === 'assistant' && (
-                  <Box sx={{ mt: 2, pt: 1, borderTop: '1px solid rgba(0, 212, 255, 0.2)' }}>
+                  <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(75, 85, 99, 0.2)' }}>
                     <Chip
                       size="small"
                       label={
@@ -238,15 +274,13 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
                       }
                       sx={{
                         background: msg.model === 'system-error' 
-                          ? 'rgba(255, 71, 87, 0.1)' 
-                          : 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(79, 255, 176, 0.05))',
-                        color: msg.model === 'system-error' ? '#ff4757' : '#00d4ff',
+                          ? 'rgba(239, 68, 68, 0.15)' 
+                          : 'rgba(74, 222, 128, 0.15)',
+                        color: msg.model === 'system-error' ? '#ef4444' : '#4ade80',
                         border: '1px solid',
-                        borderColor: msg.model === 'system-error' ? '#ff4757' : 'rgba(0, 212, 255, 0.3)',
+                        borderColor: msg.model === 'system-error' ? '#ef4444' : 'rgba(74, 222, 128, 0.3)',
                         fontWeight: 600,
-                        '& .MuiChip-label': {
-                          fontSize: '0.8rem',
-                        }
+                        fontSize: '0.8rem',
                       }}
                     />
                   </Box>
@@ -254,33 +288,27 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
                 
                 {/* Sources */}
                 {msg.sources && msg.sources.length > 0 && (
-                  <Box sx={{ mt: 2 }}>
+                  <Box sx={{ mt: 3 }}>
                     <Accordion 
                       sx={{ 
-                        background: 'rgba(26, 26, 26, 0.9)',
-                        border: '1px solid rgba(0, 212, 255, 0.2)',
-                        borderRadius: 2,
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        border: '1px solid rgba(75, 85, 99, 0.3)',
+                        borderRadius: 3,
                         '&:before': { display: 'none' },
-                        color: '#ffffff',
                       }}
                     >
                       <AccordionSummary 
-                        expandIcon={<ExpandMore sx={{ color: '#00d4ff' }} />}
-                        sx={{
-                          '& .MuiAccordionSummary-content': {
-                            color: '#ffffff',
-                          }
-                        }}
+                        expandIcon={<ExpandMore sx={{ color: '#4ade80' }} />}
                       >
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Source sx={{ fontSize: 18, color: '#00d4ff' }} />
+                          <Source sx={{ fontSize: 18, color: '#4ade80' }} />
                           <Typography variant="body2" fontWeight={600} sx={{ color: '#ffffff' }}>
                             📚 {msg.sources.length} Research Sources
                           </Typography>
                         </Stack>
                       </AccordionSummary>
-                      <AccordionDetails sx={{ background: 'rgba(0, 0, 0, 0.2)' }}>
-                        <Stack spacing={1}>
+                      <AccordionDetails>
+                        <Stack spacing={2}>
                           {msg.sources.map((source: any, i: number) => (
                             <Link 
                               key={i}
@@ -290,21 +318,21 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
                               underline="hover"
                               sx={{
                                 display: 'block',
-                                p: 1.5,
-                                borderRadius: 1,
-                                background: 'rgba(0, 212, 255, 0.1)',
-                                border: '1px solid rgba(0, 212, 255, 0.2)',
-                                color: '#ffffff',
+                                p: 2,
+                                borderRadius: 2,
+                                background: 'rgba(74, 222, 128, 0.08)',
+                                border: '1px solid rgba(74, 222, 128, 0.2)',
+                                color: '#e5e7eb',
                                 transition: 'all 0.3s ease',
                                 '&:hover': {
-                                  background: 'rgba(0, 212, 255, 0.2)',
+                                  background: 'rgba(74, 222, 128, 0.15)',
+                                  borderColor: 'rgba(74, 222, 128, 0.4)',
+                                  color: '#4ade80',
                                   transform: 'translateX(4px)',
-                                  borderColor: 'rgba(0, 212, 255, 0.4)',
-                                  boxShadow: '0 2px 10px rgba(0, 212, 255, 0.2)',
                                 },
                               }}
                             >
-                              <Typography variant="body2" fontWeight={500} sx={{ color: '#ffffff' }}>
+                              <Typography variant="body2" fontWeight={500}>
                                 {i + 1}. {source.title}
                               </Typography>
                             </Link>
@@ -321,19 +349,20 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
           {isProcessing && (
             <Fade in>
               <Paper 
-                variant="outlined" 
+                elevation={0}
                 sx={{ 
                   p: 3, 
-                  background: 'rgba(26, 26, 26, 0.9)',
-                  border: '1px solid rgba(0, 212, 255, 0.3)',
-                  borderRadius: '20px 20px 20px 5px',
+                  background: 'rgba(26, 29, 33, 0.9)',
+                  border: '1px solid rgba(74, 222, 128, 0.3)',
+                  borderRadius: '20px 20px 20px 4px',
                   maxWidth: '85%',
-                  boxShadow: '0 4px 20px rgba(0, 212, 255, 0.2), 0 0 15px rgba(79, 255, 176, 0.1)',
+                  backdropFilter: 'blur(20px)',
+                  boxShadow: '0 4px 20px rgba(74, 222, 128, 0.15)',
                 }}
               >
                 <Stack direction="row" spacing={2} alignItems="center">
-                  <CircularProgress size={20} sx={{ color: '#00d4ff' }} />
-                  <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 600 }}>
+                  <CircularProgress size={20} sx={{ color: '#4ade80' }} />
+                  <Typography variant="body2" sx={{ color: '#e5e7eb', fontWeight: 500 }}>
                     🔍 Searching web & analyzing responses...
                   </Typography>
                 </Stack>
@@ -343,15 +372,15 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
         </Stack>
       </Box>
 
-      <Divider sx={{ opacity: 0.3 }} />
+      <Divider sx={{ borderColor: 'rgba(75, 85, 99, 0.2)' }} />
       
-      {/* Input Area */}
+      {/* Input Area - Unseal Style */}
       <Box sx={{ 
         p: 4, 
-        background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, rgba(79, 255, 176, 0.02) 100%)',
-        borderTop: '1px solid rgba(0, 212, 255, 0.2)',
+        background: 'linear-gradient(135deg, rgba(74, 222, 128, 0.03) 0%, rgba(34, 197, 94, 0.01) 100%)',
+        borderTop: '1px solid rgba(75, 85, 99, 0.2)',
       }}>
-        <Stack direction="row" spacing={3} alignItems="flex-start">
+        <Stack direction="row" spacing={3} alignItems="flex-end">
           <TextField
             placeholder="Ask me anything about AI, research, technology..."
             fullWidth
@@ -370,27 +399,14 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
             variant="outlined"
             sx={{
               '& .MuiOutlinedInput-root': {
-                fontSize: '1.1rem',
-                minHeight: '60px',
-                display: 'flex',
-                alignItems: 'center',
-                '& fieldset': {
-                  borderColor: 'rgba(0, 212, 255, 0.4)',
-                },
+                fontSize: '1rem',
+                minHeight: '56px',
+                borderRadius: 3,
                 '& textarea': {
-                  fontSize: '1.1rem',
-                  padding: '18px 24px !important',
-                  minHeight: '24px !important',
-                  maxHeight: 'none',
+                  fontSize: '1rem',
+                  lineHeight: 1.5,
                   resize: 'none',
-                  lineHeight: '1.5',
-                  overflow: 'hidden',
                 },
-                '&.Mui-focused': {
-                  '& textarea': {
-                    overflow: 'auto',
-                  }
-                }
               },
             }}
           />
@@ -400,27 +416,21 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
             variant="contained"
             size="large"
             sx={{ 
-              minWidth: '120px',
-              height: '60px',
-              borderRadius: '16px',
-              fontSize: '1.1rem',
+              minWidth: '100px',
+              height: '56px',
+              borderRadius: 3,
+              fontSize: '1rem',
               fontWeight: 700,
               textTransform: 'none',
-              alignSelf: 'flex-start',
-              background: 'linear-gradient(135deg, #00d4ff 0%, #4fffb0 100%)',
-              color: '#000000',
-              border: '1px solid rgba(0, 212, 255, 0.3)',
-              boxShadow: '0 4px 20px rgba(0, 212, 255, 0.4), 0 0 20px rgba(79, 255, 176, 0.2)',
+              px: 3,
+              boxShadow: '0 4px 20px rgba(74, 222, 128, 0.3)',
               '&:hover': {
-                background: 'linear-gradient(135deg, #4fffb0 0%, #00d4ff 100%)',
-                transform: 'translateY(-2px) scale(1.02)',
-                boxShadow: '0 8px 40px rgba(0, 212, 255, 0.6), 0 0 30px rgba(79, 255, 176, 0.4)',
-                border: '1px solid rgba(79, 255, 176, 0.5)',
+                boxShadow: '0 8px 40px rgba(74, 222, 128, 0.4)',
+                transform: 'translateY(-2px)',
               },
               '&:disabled': {
                 opacity: 0.6,
                 transform: 'none',
-                background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.3) 0%, rgba(79, 255, 176, 0.3) 100%)',
               }
             }}
           >
