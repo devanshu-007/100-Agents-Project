@@ -6,7 +6,7 @@
   font-weight: 400;
 
   color-scheme: light;
-  
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -209,7 +209,7 @@ body {
 @keyframes lds-ellipsis3 {
   0% {
     transform: scale(1);
-  }
+}
   100% {
     transform: scale(0);
   }
@@ -255,7 +255,7 @@ textarea:focus-visible {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
+}
 }
 
 /* Professional glow effects */
@@ -351,7 +351,7 @@ textarea:focus-visible {
   animation: holo-shift 3s ease-in-out infinite;
   position: relative;
   overflow: hidden;
-}
+  }
 
 .holo-button::before {
   content: '';
