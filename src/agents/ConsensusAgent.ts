@@ -20,7 +20,8 @@ interface LanguageModelConfig {
 interface ConsensusAgentConfig {
   primaryModel: LanguageModelConfig;
   secondaryModel: LanguageModelConfig;
-  fallbackModel: LanguageModelConfig; // New fallback option
+  tertiaryModel: LanguageModelConfig; // NEW: Third model for advanced consensus
+  fallbackModel: LanguageModelConfig;
   similarityThreshold: number; // e.g., 0.5 for 50% similarity
 }
 
@@ -70,6 +71,86 @@ class ConsensusAgent {
     return union.size === 0 ? 1 : intersection.size / union.size;
   }
 
+  // NEW: Advanced 3-model consensus logic
+  private selectBestResponseFromThree(
+    primary: ModelResponse,
+    secondary: ModelResponse,
+    tertiary: ModelResponse
+  ): ModelResponse {
+    // Calculate pairwise similarities
+    const sim12 = this.calculateSimilarity(primary.content, secondary.content);
+    const sim13 = this.calculateSimilarity(primary.content, tertiary.content);
+    const sim23 = this.calculateSimilarity(secondary.content, tertiary.content);
+    
+    const threshold = this.config.similarityThreshold;
+    
+    // Check for 3-way consensus (all models agree)
+    if (sim12 >= threshold && sim13 >= threshold && sim23 >= threshold) {
+      return {
+        ...primary,
+        model: `${primary.model} + ${secondary.model} + ${tertiary.model} (High Consensus)`,
+        content: primary.content // Use primary as base for high consensus
+      };
+    }
+    
+    // Check for 2-way consensus patterns
+    if (sim12 >= threshold) {
+      // Primary & Secondary agree
+      return {
+        content: `**🤖 Consensus View (${primary.model} + ${secondary.model}):**
+${primary.content}
+
+**🔍 Alternative Perspective (${tertiary.model}):**
+${tertiary.content}`,
+        model: `${primary.model} + ${secondary.model} vs ${tertiary.model}`,
+        timestamp: new Date(),
+      };
+    }
+    
+    if (sim13 >= threshold) {
+      // Primary & Tertiary agree
+      return {
+        content: `**🤖 Consensus View (${primary.model} + ${tertiary.model}):**
+${primary.content}
+
+**🔍 Alternative Perspective (${secondary.model}):**
+${secondary.content}`,
+        model: `${primary.model} + ${tertiary.model} vs ${secondary.model}`,
+        timestamp: new Date(),
+      };
+    }
+    
+    if (sim23 >= threshold) {
+      // Secondary & Tertiary agree
+      return {
+        content: `**🤖 Consensus View (${secondary.model} + ${tertiary.model}):**
+${secondary.content}
+
+**🔍 Alternative Perspective (${primary.model}):**
+${primary.content}`,
+        model: `${secondary.model} + ${tertiary.model} vs ${primary.model}`,
+        timestamp: new Date(),
+      };
+    }
+    
+    // No consensus - show all three perspectives
+    return {
+      content: `**🎯 Multiple Expert Perspectives (No Consensus):**
+
+**Perspective 1 (${primary.model}):**
+${primary.content}
+
+**Perspective 2 (${secondary.model}):**
+${secondary.content}
+
+**Perspective 3 (${tertiary.model}):**
+${tertiary.content}`,
+      model: `${primary.model} + ${secondary.model} + ${tertiary.model} (Diverse Views)`,
+      timestamp: new Date(),
+    };
+  }
+
+  // Updated: Use legacy 2-model logic for backward compatibility
   private selectBestResponse(
     primary: ModelResponse,
     secondary: ModelResponse
@@ -136,12 +217,13 @@ class ConsensusAgent {
 
       // Step 3: Query the models with the enhanced prompt (with fallback)
       try {
-        const [primaryResponse, secondaryResponse] = await Promise.all([
+        const [primaryResponse, secondaryResponse, tertiaryResponse] = await Promise.all([
           this.queryLanguageModelWithFallback(this.config.primaryModel, contextualPrompt),
           this.queryLanguageModelWithFallback(this.config.secondaryModel, contextualPrompt),
+          this.queryLanguageModelWithFallback(this.config.tertiaryModel, contextualPrompt),
         ]);
 
-        const finalResponse = this.selectBestResponse(primaryResponse, secondaryResponse);
+        const finalResponse = this.selectBestResponseFromThree(primaryResponse, secondaryResponse, tertiaryResponse);
         finalResponse.sources = searchContext.results;
         return finalResponse;
       } catch (error) {

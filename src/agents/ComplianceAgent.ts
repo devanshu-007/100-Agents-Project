@@ -8,8 +8,8 @@ export interface AuditItem {
   timestamp: Date;
 }
 
-// The final output of the enhanced compliance audit
-export interface ComplianceReport {
+// The final output of the enhanced risk audit
+export interface RiskAuditReport {
   isCompliant: boolean;
   reasoning: string;
   summary: string; // Visual summary with icons
@@ -30,9 +30,9 @@ export interface ChatMessage {
   content: string;
 }
 
-class ComplianceAgent {
+class RiskAuditorAgent {
   private groqClient: Groq;
-  private judgeModel: string = 'llama3-8b-8192';
+  private judgeModel: string = 'gemma-7b-it';
 
   constructor() {
     const groqApiKey = import.meta.env.VITE_GROQ_API_KEY || 'your_groq_api_key_here';
@@ -47,11 +47,11 @@ class ComplianceAgent {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  public async analyzeCompliance(
+  public async analyzeRisk(
     textToAnalyze: string, 
     conversationHistory?: ChatMessage[],
     onProgress?: (metric: 'clarity' | 'bias' | 'toxicity' | 'hallucination' | 'intent_alignment') => void
-  ): Promise<ComplianceReport> {
+  ): Promise<RiskAuditReport> {
     try {
       const allItems: AuditItem[] = [];
 
@@ -97,9 +97,9 @@ class ComplianceAgent {
         this.getRiskIcon(metrics.intent_alignment, true)
       ].join(' ');
 
-      const report: ComplianceReport = {
+      const report: RiskAuditReport = {
         isCompliant: metrics.bias < 0.5 && metrics.toxicity < 0.5 && metrics.hallucination < 0.5,
-        reasoning: `Analysis complete: Clarity ${(metrics.clarity * 100).toFixed(0)}%, Bias ${(metrics.bias * 100).toFixed(0)}%, Toxicity ${(metrics.toxicity * 100).toFixed(0)}%, Hallucination ${(metrics.hallucination * 100).toFixed(0)}%, Intent ${(metrics.intent_alignment * 100).toFixed(0)}%`,
+        reasoning: `Risk analysis complete: Clarity ${(metrics.clarity * 100).toFixed(0)}%, Bias ${(metrics.bias * 100).toFixed(0)}%, Toxicity ${(metrics.toxicity * 100).toFixed(0)}%, Hallucination ${(metrics.hallucination * 100).toFixed(0)}%, Intent ${(metrics.intent_alignment * 100).toFixed(0)}%`,
         summary,
         items: allItems,
         metrics,
@@ -109,10 +109,10 @@ class ComplianceAgent {
       return report;
 
     } catch (error) {
-      // Return a demo compliance report if API fails
+      // Return a demo risk audit report if API fails
       return {
         isCompliant: true,
-        reasoning: 'Demo mode: Running with mock analysis due to missing API keys',
+        reasoning: 'Demo mode: Running with mock risk analysis due to missing API keys',
         summary: '✅ ✅ ✅ ✅',
         items: [],
         metrics: {
@@ -122,7 +122,7 @@ class ComplianceAgent {
           hallucination: 0.15,
           intent_alignment: 0.9,
         },
-        explanation: 'Demo analysis completed - Please add your Groq API key to get real compliance analysis'
+        explanation: 'Demo risk analysis completed - Please add your Groq API key to get real risk assessment'
       };
     }
   }
@@ -254,4 +254,4 @@ Be strict with scoring. A perfect 1.00 means the assistant addressed every user 
   }
 }
 
-export const complianceAgent = new ComplianceAgent(); 
+export const riskAuditorAgent = new RiskAuditorAgent(); 
