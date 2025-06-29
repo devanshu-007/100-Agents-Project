@@ -93,7 +93,7 @@ export function AppLayout({ chatPanel, reportPanel }: AppLayoutProps) {
                   letterSpacing: '-0.01em',
                 }}
               >
-                Aegis Veritas
+                Veritas
               </Typography>
             </Stack>
           </Toolbar>
@@ -219,7 +219,7 @@ export function AppLayout({ chatPanel, reportPanel }: AppLayoutProps) {
           px: { xs: 2, sm: 3, md: 4 },
           position: 'relative',
           zIndex: 1,
-          height: '90vh', // Fixed 90vh height as requested
+          height: '100vh', // Fixed 90vh height as requested
           display: 'flex', // Ensure container is flex for proper height distribution
           flexDirection: 'column',
         }}

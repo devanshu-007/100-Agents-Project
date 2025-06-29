@@ -14,7 +14,6 @@ import {
   Chip,
   Fade,
   Slide,
-  Skeleton,
   LinearProgress
 } from '@mui/material';
 import { 
@@ -30,10 +29,10 @@ import {
 } from '@mui/icons-material';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import type { Message } from '../App';
+import type { ChatMessage } from '../agents/RiskAuditorAgent';
 
 interface ConversationFlowProps {
-  history: Message[];
+  history: ChatMessage[];
   isProcessing: boolean;
   onSendMessage: (message: string) => void;
 }
@@ -195,13 +194,12 @@ export function ConversationFlow({ history, isProcessing, onSendMessage }: Conve
         )}
         
         <Stack spacing={3}>
-          {history.map((msg, index) => (
+          {history.map((msg) => (
             <Slide 
-              key={index} 
+              key={msg.id} 
               direction={msg.role === 'user' ? 'left' : 'right'} 
               in 
               timeout={500}
-              style={{ transitionDelay: `${index * 100}ms` }}
             >
               <Paper 
                 elevation={0}

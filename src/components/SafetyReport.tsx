@@ -5,7 +5,6 @@ import {
   Stack, 
   Chip, 
   Box,
-  LinearProgress,
   List,
   ListItem,
   ListItemIcon,
@@ -13,18 +12,15 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Divider,
   Card,
   CardContent,
   Fade,
-  Grow,
-  CircularProgress as MUICircularProgress
+  Grow
 } from '@mui/material';
 import { 
   CheckCircle, 
   Error, 
   Refresh,
-  Analytics,
   BalanceOutlined,
   HealthAndSafety,
   Psychology,
@@ -33,12 +29,10 @@ import {
   Info,
   ExpandMore,
   Security,
-  Speed,
-  TrendingUp,
   Shield,
   Visibility
 } from '@mui/icons-material';
-import type { RiskAuditReport, AuditItem } from '../agents/ComplianceAgent';
+import type { RiskAuditReport } from '../agents/RiskAuditorAgent';
 
 type AnalysisProgress = {
   clarity: 'pending' | 'analyzing' | 'complete';
@@ -217,51 +211,7 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
     );
   };
 
-  const renderAuditItem = (item: AuditItem, index: number) => {
-    const getItemIcon = () => {
-      switch (item.type) {
-        case 'error': return <Error color="error" />;
-        case 'warning': return <Warning color="warning" />;
-        case 'info': return <Info color="info" />;
-      }
-    };
-
-    const getItemColor = () => {
-      switch (item.type) {
-        case 'error': return 'error.main';
-        case 'warning': return 'warning.main';
-        case 'info': return 'info.main';
-      }
-    };
-
-    return (
-      <Fade in timeout={400} style={{ transitionDelay: `${index * 100}ms` }} key={item.id}>
-        <ListItem
-          sx={{
-            borderRadius: 2,
-            mb: 1,
-            background: 'rgba(255, 255, 255, 0.5)',
-            border: '1px solid rgba(102, 126, 234, 0.1)',
-            transition: 'all 0.3s ease',
-            '&:hover': {
-              background: 'rgba(102, 126, 234, 0.05)',
-              transform: 'translateX(4px)',
-            },
-          }}
-        >
-          <ListItemIcon>{getItemIcon()}</ListItemIcon>
-          <ListItemText
-            primary={item.message}
-            secondary={`${item.type.toUpperCase()} • ${item.timestamp.toLocaleTimeString()}`}
-            primaryTypographyProps={{ 
-              color: getItemColor(),
-              fontWeight: 500,
-            }}
-          />
-        </ListItem>
-      </Fade>
-    );
-  };
+  // Removed unused renderAuditItem function
 
   return (
     <Paper 
@@ -416,7 +366,7 @@ export function SafetyReport({ report, isLoading, analysisProgress }: SafetyRepo
                     </AccordionSummary>
                     <AccordionDetails>
                       <List sx={{ p: 0 }}>
-                        {report.items.map((item, index) => (
+                        {report.items.map((item) => (
                           <ListItem 
                             key={item.id}
                             sx={{

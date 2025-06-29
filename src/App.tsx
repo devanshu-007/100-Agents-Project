@@ -4,8 +4,8 @@ import { SafetyReport } from './components/SafetyReport';
 import { useState } from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import ConsensusAgent from './agents/ConsensusAgent';
-import { riskAuditorAgent } from './agents/ComplianceAgent';
-import type { RiskAuditReport, ChatMessage } from './agents/ComplianceAgent';
+import { riskAuditorAgent } from './agents/RiskAuditorAgent';
+import type { RiskAuditReport, ChatMessage } from './agents/RiskAuditorAgent';
 
 // Ultra-modern dark theme inspired by Unseal design
 const theme = createTheme({
@@ -388,14 +388,6 @@ const theme = createTheme({
   },
 });
 
-// Define the structure for a single message
-export interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-  model?: string;
-  sources?: any[];
-}
-
 // Configuration for the Consensus Agent - Now with 3 models for advanced consensus
 const agentConfig = {
   primaryModel: { modelName: 'llama3-8b-8192', temperature: 0.5, maxTokens: 1024 },
@@ -415,7 +407,7 @@ type AnalysisProgress = {
 };
 
 function App() {
-  const [conversationHistory, setConversationHistory] = useState<Message[]>([]);
+  const [conversationHistory, setConversationHistory] = useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [riskAuditReport, setRiskAuditReport] = useState<RiskAuditReport | null>(null);
   const [isAuditing, setIsAuditing] = useState(false);
@@ -427,17 +419,14 @@ function App() {
     intent_alignment: 'pending'
   });
 
-  const convertToAuditFormat = (messages: Message[]): ChatMessage[] => {
-    return messages.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
-  };
-
   const handleSendMessage = async (userInput: string) => {
     if (!userInput.trim()) return;
 
-    const userMessage: Message = { role: 'user', content: userInput };
+    const userMessage: ChatMessage = { 
+      id: `user-${Date.now()}`,
+      role: 'user', 
+      content: userInput 
+    };
     setConversationHistory(prev => [...prev, userMessage]);
     setIsProcessing(true);
     setRiskAuditReport(null);
@@ -450,79 +439,62 @@ function App() {
     });
 
     try {
-      // Step 1: Get streaming response from the consensus agent
-      const tempAssistantMessage: Message = {
+      // Add a placeholder for the assistant's response
+      const assistantId = `assistant-${Date.now()}`;
+      const assistantMessage: ChatMessage = {
+        id: assistantId,
         role: 'assistant',
         content: '',
-        model: 'Generating...',
+        model: 'Thinking...',
       };
-      setConversationHistory(prev => [...prev, tempAssistantMessage]);
+      setConversationHistory(prev => [...prev, assistantMessage]);
+      setIsProcessing(false);
 
       let streamingContent = '';
       const streamGenerator = consensusAgent.generateConsensusResponseStream(
         userInput,
         (token) => {
           streamingContent += token;
-          setConversationHistory(prev => {
-            const updated = [...prev];
-            const lastIndex = updated.length - 1;
-            if (updated[lastIndex].role === 'assistant') {
-              updated[lastIndex] = {
-                ...updated[lastIndex],
-                content: streamingContent,
-              };
-            }
-            return updated;
-          });
+          setConversationHistory(prev =>
+            prev.map(msg =>
+              msg.id === assistantId
+                ? { ...msg, content: streamingContent, model: 'Generating...' }
+                : msg
+            )
+          );
         }
       );
 
-      // Consume the stream and get final response
+      // Consume the stream to get the final response metadata
       let finalResponse: any = null;
-      for await (const _token of streamGenerator) {
-        // Tokens are handled in the callback above
-      }
+      for await (const _token of streamGenerator) {}
       
-      try {
-        const result = await streamGenerator.next();
-        if (result.done) {
-          finalResponse = result.value;
-        }
-      } catch (e) {
-        finalResponse = await consensusAgent.generateConsensusResponse(userInput);
-        setConversationHistory(prev => {
-          const updated = [...prev];
-          const lastIndex = updated.length - 1;
-          if (updated[lastIndex].role === 'assistant') {
-            updated[lastIndex] = {
-              ...updated[lastIndex],
-              content: finalResponse.content,
-            };
-          }
-          return updated;
-        });
+      const result = await streamGenerator.next();
+      if (result.done) {
+        finalResponse = result.value;
       }
-      
+
       // Update the final message with complete metadata
-      const updatedHistory = [...conversationHistory, userMessage];
-      const finalAssistantMessage: Message = {
-        role: 'assistant',
-        content: finalResponse?.content || streamingContent,
-        model: finalResponse?.model || 'Unknown',
-        sources: finalResponse?.sources,
-      };
-      updatedHistory.push(finalAssistantMessage);
-      
-      setConversationHistory(updatedHistory);
+      setConversationHistory(prev =>
+        prev.map(msg =>
+          msg.id === assistantId
+            ? {
+                ...msg,
+                content: finalResponse?.content || streamingContent,
+                model: finalResponse?.model || 'Unknown',
+                sources: finalResponse?.sources,
+              }
+            : msg
+        )
+      );
 
       // Step 2: Enhanced audit with conversation context
       setIsAuditing(true);
       const auditContent = finalResponse?.content || streamingContent;
-      const auditHistory = convertToAuditFormat(updatedHistory);
       
       const report = await riskAuditorAgent.analyzeRisk(
         auditContent,
-        auditHistory,
+        conversationHistory, // Use the current history
         (metric: 'clarity' | 'bias' | 'toxicity' | 'hallucination' | 'intent_alignment') => {
           setAnalysisProgress(prev => ({ ...prev, [metric]: 'analyzing' }));
           setTimeout(() => {
@@ -533,7 +505,8 @@ function App() {
       setRiskAuditReport(report);
 
     } catch (error) {
-      const errorMessage: Message = {
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
         role: 'assistant',
         content: 'Sorry, I encountered an error. Please try again.',
         model: 'system-error'

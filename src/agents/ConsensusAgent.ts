@@ -41,15 +41,15 @@ class ConsensusAgent {
 
     // Log API status for debugging
     if (groqApiKey === 'demo-key' || groqApiKey === 'your_groq_api_key_here') {
-      console.warn('⚠️ Aegis Veritas: No valid Groq API key found. AI responses will be in demo mode.');
+      console.warn('⚠️ Veritas: No valid Groq API key found. AI responses will be in demo mode.');
     } else {
-      console.info('✅ Aegis Veritas: Groq API key detected for AI models.');
+      console.info('✅ Veritas: Groq API key detected for AI models.');
     }
 
     if (tavilyApiKey === 'demo-key' || tavilyApiKey === 'your_tavily_api_key_here') {
-      console.warn('⚠️ Aegis Veritas: No valid Tavily API key found. Web search will be in demo mode.');
+      console.warn('⚠️ Veritas: No valid Tavily API key found. Web search will be in demo mode.');
     } else {
-      console.info('✅ Aegis Veritas: Tavily API key detected for web search.');
+      console.info('✅ Veritas: Tavily API key detected for web search.');
     }
 
     if ((groqApiKey === 'demo-key' || groqApiKey === 'your_groq_api_key_here') || 
@@ -168,28 +168,7 @@ ${tertiary.content}`,
     };
   }
 
-  // Updated: Use legacy 2-model logic for backward compatibility
-  private selectBestResponse(
-    primary: ModelResponse,
-    secondary: ModelResponse
-  ): ModelResponse {
-    const similarity = this.calculateSimilarity(primary.content, secondary.content);
-
-    if (similarity >= this.config.similarityThreshold) {
-      // If responses are similar enough, prefer the primary model's response.
-      return primary;
-    }
-
-    // If responses are too different, combine them to show both perspectives.
-    return {
-      content: `---
-      \n**Perspective 1 (${primary.model}):**\n${primary.content}
-      \n---\n
-      \n**Perspective 2 (${secondary.model}):**\n${secondary.content}`,
-      model: `${primary.model} + ${secondary.model}`,
-      timestamp: new Date(),
-    };
-  }
+  // Removed unused selectBestResponse method
 
   private createPromptWithContext(prompt: string, context: any[]): string {
     const contextString = context.map((item, index) => `[${index + 1}] ${item.title}: ${item.snippet}`).join('\n');

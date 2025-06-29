@@ -25,7 +25,7 @@ interface SearchConfig {
 }
 
 class TavilySearchAgent {
-  private config: SearchConfig;
+  private config: SearchConfig; // Used in methods
 
   constructor(config: SearchConfig) {
     this.config = {
@@ -80,15 +80,13 @@ class TavilySearchAgent {
         throw new Error("Invalid search query");
       }
 
-      // Simulate search using environment variables
-      const mockResults = [
-        {
-          title: `Research Results for: ${sanitizedQuery}`,
-          url: `https://example.com/search?q=${encodeURIComponent(sanitizedQuery)}`,
-          content: `This is a mock search result for the query: ${sanitizedQuery}. In a real implementation, this would connect to Tavily's API.`,
-          published_date: new Date().toISOString()
-        }
-      ];
+      // Simulate search using environment variables and config
+      const mockResults = Array.from({ length: this.config.maxResults || 5 }, (_, i) => ({
+        title: `Research Results ${i + 1} for: ${sanitizedQuery}`,
+        url: `https://example.com/search?q=${encodeURIComponent(sanitizedQuery)}&result=${i + 1}`,
+        content: `This is mock search result ${i + 1} for the query: ${sanitizedQuery}. In a real implementation, this would connect to Tavily's API.`,
+        published_date: new Date().toISOString()
+      }));
 
       const formattedResults = this.formatResults(mockResults);
       
