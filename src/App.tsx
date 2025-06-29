@@ -65,7 +65,7 @@ const theme = createTheme({
     divider: 'rgba(75, 85, 99, 0.2)', // Subtle gray dividers
   },
   typography: {
-    fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: '"Space Grotesk", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     h1: {
       fontSize: '3.5rem',
       fontWeight: 700,

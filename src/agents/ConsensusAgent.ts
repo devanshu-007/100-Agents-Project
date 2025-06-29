@@ -38,6 +38,24 @@ class ConsensusAgent {
     this.groqClient = new Groq({ apiKey: groqApiKey, dangerouslyAllowBrowser: true });
     this.tavilyClient = new TavilyClient({ apiKey: tavilyApiKey });
     this.config = config;
+
+    // Log API status for debugging
+    if (groqApiKey === 'demo-key' || groqApiKey === 'your_groq_api_key_here') {
+      console.warn('⚠️ Aegis Veritas: No valid Groq API key found. AI responses will be in demo mode.');
+    } else {
+      console.info('✅ Aegis Veritas: Groq API key detected for AI models.');
+    }
+
+    if (tavilyApiKey === 'demo-key' || tavilyApiKey === 'your_tavily_api_key_here') {
+      console.warn('⚠️ Aegis Veritas: No valid Tavily API key found. Web search will be in demo mode.');
+    } else {
+      console.info('✅ Aegis Veritas: Tavily API key detected for web search.');
+    }
+
+    if ((groqApiKey === 'demo-key' || groqApiKey === 'your_groq_api_key_here') || 
+        (tavilyApiKey === 'demo-key' || tavilyApiKey === 'your_tavily_api_key_here')) {
+      console.info('ℹ️ See API_SETUP.md for configuration instructions.');
+    }
   }
 
   private async queryLanguageModel(
